@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'gli'
+require 'elastic_op'
+require 'elastic_op/cli'
+
+class ElasticOpCli
+  extend GLI::App
+
+  program_desc 'Elastic Op'
+  version ElasticOp::VERSION
+
+  subcommand_option_handling :normal
+  arguments :strict
+
+  desc 'Elasticsearch URL'
+  flag %i[url U], default_value: 'https://localhost:9200'
+
+  desc 'Username for basic authentication'
+  flag %i[username u]
+
+  desc 'Password for basic authentication'
+  flag %i[password p]
+
+  desc 'Cluster'
+  command :cluster do |cluster|
+    cluster.desc 'Cluster version'
+    cluster.command :version do |version|
+      version.action do |_global_options, _options, _args|
+        @cli
+          .cluster.version
+      end
+    end
+
+    cluster.desc 'Cluster health'
+    cluster.command :health do |health|
+      health.action do |_global_options, _options, _args|
+        @cli.cluster.health
+      end
+    end
+  end
+
+  pre do |global, _command, _options, _args|
+    @cli = ElasticOp::Cli.new(options: global)
+
+    true
+  end
+
+  post do |_global, _command, _options, _args|
+    true
+  end
+
+  on_error do |_exception|
+    true
+  end
+end
+
+exit ElasticOpCli.run(ARGV)
