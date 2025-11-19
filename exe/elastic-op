@@ -15,28 +15,84 @@ class ElasticOpCli
   arguments :strict
 
   desc 'Elasticsearch URL'
-  flag %i[url U], default_value: 'https://localhost:9200'
+  flag %i[url U], type: String, default_value: 'https://localhost:9200'
 
   desc 'Username for basic authentication'
-  flag %i[username u]
+  flag %i[username u], type: String
 
   desc 'Password for basic authentication'
-  flag %i[password p]
+  flag %i[password p], type: String
 
-  desc 'Cluster'
+  desc 'Logging level (debug, info, warn, error, fatal)'
+  flag %i[log-level L log_level], type: String,
+                                  default_value: 'info'
+
+  desc 'SSL verify'
+  switch %i[ssl-verify ssl_verify], default_value: true
+
+  desc 'CA certificate'
+  flag %i[ca], type: String
+
+  desc 'Cluster operations'
   command :cluster do |cluster|
     cluster.desc 'Cluster version'
-    cluster.command :version do |version|
-      version.action do |_global_options, _options, _args|
-        @cli
-          .cluster.version
+    cluster.command :version do |cluster_version|
+      cluster_version.action do |_global_options, _options, _args|
+        @cli.cluster.version
       end
     end
 
     cluster.desc 'Cluster health'
-    cluster.command :health do |health|
-      health.action do |_global_options, _options, _args|
+    cluster.command :health do |cluster_health|
+      cluster_health.action do |_global_options, _options, _args|
         @cli.cluster.health
+      end
+    end
+  end
+
+  desc 'Nodes operations'
+  command :node do |_node|
+    true
+  end
+
+  desc 'Index operations'
+  command [:index, :indices] do |index|
+    index.desc 'Index list'
+    index.command :list do |index_list|
+      index_list.action do |_global_options, options, args|
+        @cli.index.list(args, options: options)
+      end
+    end
+  end
+
+  desc 'Shard operations'
+  command :shard do |shard|
+    shard.desc 'Node Shard evacuate'
+    shard.command :evacuate do |shard_evacuate|
+      shard_evacuate.flag :count, :c,
+                          type: Integer,
+                          required: true,
+                          default_value: 1,
+                          desc: 'Count of shards to evacuate.'
+
+      shard_evacuate.flag :order, :o,
+                          type: String,
+                          must_match: /biggest/i,
+                          default_value: 'biggest',
+                          desc: 'Order of evacuation.'
+
+      shard_evacuate.flag :source_node, :s,
+                          type: String,
+                          required: true,
+                          desc: 'Specific source node to move shards FROM.'
+
+      shard_evacuate.flag :target_node, :t,
+                          type: String,
+                          desc: 'Specific target node to move shards TO.'
+
+      shard_evacuate.arg_name 'shard_pattern', [:multiple]
+      shard_evacuate.action do |_global_options, options, args|
+        @cli.shard.evacuate(args, options: options)
       end
     end
   end
@@ -51,7 +107,17 @@ class ElasticOpCli
     true
   end
 
-  on_error do |_exception|
+  on_error do |exception|
+    if ENV['DEBUG']
+      warn "❌ Error: #{exception.message}"
+      warn "  Exception: #{exception.class}"
+      warn '  Backtrace:'
+      # exception.backtrace.first(10).each do |line|
+      exception.backtrace.each do |line|
+        warn "    #{line}"
+      end
+    end
+
     true
   end
 end

@@ -3,12 +3,10 @@
 require_relative 'service'
 
 module ElasticOp
-  class Cli
-    class Cluster < Service
-      def version
-      end
-
-      def health
+  class Op
+    class Indices < Service
+      def list(index_pattern: '*', **_options)
+        []
       end
     end
   end
