@@ -3,6 +3,7 @@
 require_relative 'logging'
 require_relative 'client'
 require_relative 'op/indices'
+require_relative 'op/dangling'
 
 module ElasticOp
   class Op
@@ -27,5 +28,9 @@ module ElasticOp
       @indices ||= Op::Indices.new(op: self)
     end
     alias index indices
+
+    def dangling
+      @dangling ||= Op::Dangling.new(op: self)
+    end
   end
 end

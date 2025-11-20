@@ -8,9 +8,8 @@ module ElasticOp
     REQUEST_TIMEOUT = 60
     SSL_VERIFY = true
     SSL_CA = nil
-    SSL_TIMEOUT = 30
 
-    attr_reader :url, :username, :password, :logger
+    attr_reader :url, :username, :password, :logger, :options
 
     def initialize(url:, username: nil, password: nil, logger: nil, **options)
       @url = url
@@ -22,34 +21,31 @@ module ElasticOp
     end
 
     def client
-      auth_options = {
-        user: username,
-        password: password
-      }.compact
-
-      connection_options = {
-        retry_on_failure: options.fetch(:retry_on_failure, RETRY_ON_FAILURE),
-        request_timeout: options.fetch(:request_timeout, REQUEST_TIMEOUT)
-      }.compact
-
-      ssl_options = {
-        verify: options.fetch(:ssl_verify, SSL_VERIFY),
-        ca_file: options.fetch(:ca, SSL_CA),
-        ssl_timeout: options.fetch(:ssl_timeout, SSL_TIMEOUT)
-      }.compact
-
       @client ||= Elasticsearch::Client.new(
-        host: url,
-        **auth_options,
-        **connection_options,
-        transport_options: { ssl: ssl_options },
-        log: logger
+        **_client_options
       )
     end
 
-    def method_missing(method_name, *args, &block)
+    def _client_options
+      {
+        host: url,
+        user: username,
+        password: password,
+        transport_options: {
+          ssl: {
+            verify: options.fetch(:ssl_verify, SSL_VERIFY),
+            ca_file: options.fetch(:ca, SSL_CA)
+          }.compact
+        },
+        retry_on_failure: options.fetch(:retry_on_failure, RETRY_ON_FAILURE),
+        request_timeout: options.fetch(:request_timeout, REQUEST_TIMEOUT),
+        log: logger
+      }.compact
+    end
+
+    def method_missing(method_name, *, &)
       if client.respond_to?(method_name)
-        client.public_send(method_name, *args, &block)
+        client.public_send(method_name, *, &)
       else
         super
       end

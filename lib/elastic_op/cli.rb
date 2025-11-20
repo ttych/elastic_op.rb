@@ -5,6 +5,7 @@ require_relative '../elastic_op'
 require_relative 'cli/cluster'
 require_relative 'cli/index'
 require_relative 'cli/shard'
+require_relative 'cli/dangling'
 
 module ElasticOp
   class Cli
@@ -24,6 +25,10 @@ module ElasticOp
 
     def shard
       @shard ||= ElasticOp::Cli::Shard.new(op: op)
+    end
+
+    def dangling
+      @dangling ||= ElasticOp::Cli::Dangling.new(op: op)
     end
 
     def op

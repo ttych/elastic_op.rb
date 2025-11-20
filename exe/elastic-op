@@ -33,6 +33,10 @@ class ElasticOpCli
   desc 'CA certificate'
   flag %i[ca], type: String
 
+  desc 'Output format'
+  flag %i[format F],
+       default_value: :pretty
+
   desc 'Cluster operations'
   command :cluster do |cluster|
     cluster.desc 'Cluster version'
@@ -50,8 +54,8 @@ class ElasticOpCli
     end
   end
 
-  desc 'Nodes operations'
-  command :node do |_node|
+  desc 'Node operations'
+  command [:node, :nodes] do |_node|
     true
   end
 
@@ -60,7 +64,14 @@ class ElasticOpCli
     index.desc 'Index list'
     index.command :list do |index_list|
       index_list.action do |_global_options, options, args|
-        @cli.index.list(args, options: options)
+        @cli.index.get(args, options: options)
+      end
+    end
+
+    index.desc 'Index cat'
+    index.command :cat do |index_cat|
+      index_cat.action do |_global_options, options, args|
+        @cli.index.get(args, options: options)
       end
     end
   end
@@ -68,6 +79,7 @@ class ElasticOpCli
   desc 'Shard operations'
   command :shard do |shard|
     shard.desc 'Node Shard evacuate'
+    shard.arg_name 'shard_pattern', [:multiple]
     shard.command :evacuate do |shard_evacuate|
       shard_evacuate.flag :count, :c,
                           type: Integer,
@@ -90,9 +102,35 @@ class ElasticOpCli
                           type: String,
                           desc: 'Specific target node to move shards TO.'
 
-      shard_evacuate.arg_name 'shard_pattern', [:multiple]
       shard_evacuate.action do |_global_options, options, args|
         @cli.shard.evacuate(args, options: options)
+      end
+    end
+  end
+
+  desc 'Dangling operations'
+  command :dangling do |dangling|
+    dangling.desc 'Dangling list'
+    dangling.command :list do |danging_list|
+      danging_list.action do |_global_options, options, _args|
+        @cli.dangling.list(options: options)
+      end
+    end
+
+    dangling.desc 'Dangling import'
+    dangling.arg_name 'index_uuid', [:multiple]
+    dangling.command :import do |dangling_import|
+      dangling_import.action do |_global_options, options, args|
+        @cli.dangling.import(index_uuids: args, options: options)
+      end
+    end
+
+    dangling.desc 'Dangling delete'
+    dangling.arg_name 'index_uuid', [:multiple]
+    dangling.command :delete do |dangling_delete|
+      dangling_delete.arg_name 'index_uuid', [:multiple]
+      dangling_delete.action do |_global_options, options, args|
+        @cli.dangling.delete(index_uuids: args, options: options)
       end
     end
   end

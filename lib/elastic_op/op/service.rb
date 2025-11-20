@@ -5,7 +5,7 @@ module ElasticOp
     class Service
       attr_reader :op
 
-      def initialize(op: )
+      def initialize(op:)
         @op = op
       end
 

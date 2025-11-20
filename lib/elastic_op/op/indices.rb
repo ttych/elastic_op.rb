@@ -5,8 +5,21 @@ require_relative 'service'
 module ElasticOp
   class Op
     class Indices < Service
-      def list(index_pattern: '*', **_options)
-        []
+      LIST_FEATURES = %w[aliases mappings settings].freeze
+      LIST_ALLOW_NO_INDICES = true
+
+      def get(index: '*', **options)
+        op.client.indices.get(
+          index: index,
+          allow_no_indices: options.fetch(:allow_no_indices, LIST_ALLOW_NO_INDICES)
+        )
+      end
+
+      def cat(**options)
+        op.client.cat.indices(
+          h: options.fetch(:header, CAT_HEADER),
+          format: options.fetch(:format, CAT_FORMAT)
+        )
       end
     end
   end
