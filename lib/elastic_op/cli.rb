@@ -3,7 +3,8 @@
 require_relative '../elastic_op'
 
 require_relative 'cli/cluster'
-require_relative 'cli/index'
+require_relative 'cli/cat'
+require_relative 'cli/indices'
 require_relative 'cli/shard'
 require_relative 'cli/dangling'
 
@@ -19,8 +20,12 @@ module ElasticOp
       @cluster ||= ElasticOp::Cli::Cluster.new(op: op)
     end
 
-    def index
-      @index ||= ElasticOp::Cli::Index.new(op: op)
+    def cat
+      @cat ||= ElasticOp::Cli::Cat.new(op: op)
+    end
+
+    def indices
+      @indices ||= ElasticOp::Cli::Indices.new(op: op)
     end
 
     def shard

@@ -17,7 +17,7 @@ module ElasticOp
       logger_level = LOGGER_LEVEL_MAP[log_level.to_s.to_sym] || DEFAULT_LOGGER_LEVEL
       logger.level = logger_level
       logger.formatter = proc do |severity, datetime, _progname, msg|
-        "#{datetime.strftime('%H:%M:%S')} [#{severity}] #{msg}\n"
+        "#{datetime.iso8601(3)} [#{severity}] #{msg}\n"
       end
 
       logger.debug("Logger initialized with level: #{log_level}/#{logger_level}")

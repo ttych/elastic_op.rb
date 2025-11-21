@@ -2,6 +2,7 @@
 
 require_relative 'logging'
 require_relative 'client'
+require_relative 'op/cat'
 require_relative 'op/indices'
 require_relative 'op/dangling'
 
@@ -22,6 +23,10 @@ module ElasticOp
 
     def logger
       @logger = ElasticOp.logger(log_level: options[:log_level])
+    end
+
+    def cat
+      @cat ||= Op::Cat.new(op: self)
     end
 
     def indices

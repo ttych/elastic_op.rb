@@ -35,6 +35,14 @@ module ElasticOp
           end
         end
       end
+
+      def delete_all(options: {})
+        dangling_indices = op.dangling.get
+        dangling_uuids = dangling_indices.map do |dangling_index|
+          dangling_index['index_uuid']
+        end
+        delete(index_uuids: dangling_uuids, options: options)
+      end
     end
   end
 end

@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
+require_relative 'service'
+
 module ElasticOp
   class Cli
-    class Index < Service
+    class Indices < Service
       def get(index_patterns, options: {})
         logger.debug("Index#get index_patterns:#{index_patterns}")
 
-        indices = op.indices.get(index_pattern: index_patterns.first, **options)
+        indices = op.indices.get(index_pattern: index_patterns.first, options: options)
 
         if indices.empty?
           logger.debug('Index#get no indices found !')

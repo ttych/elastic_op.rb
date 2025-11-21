@@ -8,17 +8,10 @@ module ElasticOp
       LIST_FEATURES = %w[aliases mappings settings].freeze
       LIST_ALLOW_NO_INDICES = true
 
-      def get(index: '*', **options)
+      def get(index: '*', options: {})
         op.client.indices.get(
           index: index,
           allow_no_indices: options.fetch(:allow_no_indices, LIST_ALLOW_NO_INDICES)
-        )
-      end
-
-      def cat(**options)
-        op.client.cat.indices(
-          h: options.fetch(:header, CAT_HEADER),
-          format: options.fetch(:format, CAT_FORMAT)
         )
       end
     end

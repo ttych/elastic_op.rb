@@ -39,7 +39,8 @@ module ElasticOp
         },
         retry_on_failure: options.fetch(:retry_on_failure, RETRY_ON_FAILURE),
         request_timeout: options.fetch(:request_timeout, REQUEST_TIMEOUT),
-        log: logger
+        logger: logger,
+        tracer: logger
       }.compact
     end
 

@@ -59,19 +59,22 @@ class ElasticOpCli
     true
   end
 
-  desc 'Index operations'
-  command [:index, :indices] do |index|
-    index.desc 'Index list'
-    index.command :list do |index_list|
-      index_list.action do |_global_options, options, args|
-        @cli.index.get(args, options: options)
+  desc 'Cat operations'
+  command [:cat] do |cat|
+    cat.desc 'Cat indices'
+    cat.command :indices do |cat_indices|
+      cat_indices.action do |_global_options, options, _args|
+        @cli.cat.indices(options: options)
       end
     end
+  end
 
-    index.desc 'Index cat'
-    index.command :cat do |index_cat|
-      index_cat.action do |_global_options, options, args|
-        @cli.index.get(args, options: options)
+  desc 'Index operations'
+  command [:indices, :index] do |indices|
+    indices.desc 'Indices list'
+    indices.command :list do |indices_list|
+      indices_list.action do |_global_options, options, args|
+        @cli.indices.get(args, options: options)
       end
     end
   end
@@ -128,9 +131,15 @@ class ElasticOpCli
     dangling.desc 'Dangling delete'
     dangling.arg_name 'index_uuid', [:multiple]
     dangling.command :delete do |dangling_delete|
-      dangling_delete.arg_name 'index_uuid', [:multiple]
       dangling_delete.action do |_global_options, options, args|
         @cli.dangling.delete(index_uuids: args, options: options)
+      end
+    end
+
+    dangling.desc 'Dangling delete all'
+    dangling.command :'delete-all' do |dangling_delete_all|
+      dangling_delete_all.action do |_global_options, options, _args|
+        @cli.dangling.delete_all(options: options)
       end
     end
   end
